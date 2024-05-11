@@ -1,0 +1,16 @@
+RewriteEngine on
+
+# if a directory or a file exists, use it directly
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+<IfModule mod_headers.c>
+  Header set Access-Control-Allow-Origin "*"
+  #Header set Content-Type "application/json"
+  Header set Access-Control-Allow-Methods "GET,HEAD,POST,OPTIONS"
+  Header set Access-Control-Allow-Headers "Authorization,access_token,source,Content-Type"
+</IfModule>
+# otherwise forward it to index.php
+RewriteRule . index.php
+
+Options -Indexes
+# php -- END cPanel-generated handler, do not edit

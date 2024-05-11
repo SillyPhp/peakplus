@@ -1,0 +1,27 @@
+<Files .htaccess>
+order allow,deny
+deny from all
+</Files>
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteCond %{HTTP:Authorization} ^(.*)
+RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
+# if a directory or a file exists, use it directly
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+# otherwise forward it to index.php
+RewriteRule . index.php
+</IfModule>
+
+<IfModule mod_headers.c>
+#Header Set Access-Control-Allow-Origin "https://aditya.erexx.in"
+#Header Set Access-Control-Allow-Origin "https://test.erexx.in"
+#Header Set Access-Control-Allow-Origin "https://shshank.erexx.in"
+#Header Set Access-Control-Allow-Origin "https://localhost"
+#Header Set Access-Control-Allow-Origin "https://localhost:8080"
+#Header add Access-Control-Allow-Headers: "Content-Type"
+Header set Access-Control-Allow-Origin "*"
+Header set Access-Control-Allow-Methods "GET,PUT,POST,DELETE"
+Header set Access-Control-Allow-Headers "Content-Type, Authorization,source"
+</IfModule>
