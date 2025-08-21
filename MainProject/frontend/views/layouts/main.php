@@ -42,6 +42,7 @@ AppAsset::register($this);
         ['label' => 'Companies', 'url' => ['/companies']],
         ['label' => 'Policies', 'url' => ['/policies']],
         ['label' => 'Policy Documents', 'url' => ['/policy-details']],
+        ['label' => 'Teams', 'url' => ['/team']],
 //        ['label' => 'Contact', 'url' => ['/site/contact']],
     ];
     if (!Yii::$app->user->isGuest) {

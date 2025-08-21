@@ -10,6 +10,7 @@
       <sourceFolder url="file://$MODULE_DIR$/MainProject/frontend/tests/_support" isTestSource="true" packagePrefix="frontend\tests\" />
       <sourceFolder url="file://$MODULE_DIR$/spec" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/MainProject/tests" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/MainProject/vendor/symfony/string" />
       <excludeFolder url="file://$MODULE_DIR$/MainProject/vendor/sebastian/object-reflector" />
       <excludeFolder url="file://$MODULE_DIR$/MainProject/vendor/symfony/event-dispatcher-contracts" />

@@ -2,8 +2,8 @@
 <project version="4">
   <component name="WebServers">
     <option name="servers">
-      <webServer id="ab2c546f-30bc-4f46-9a7e-0595e2c7fb34" name="api.peakplusfinancial" url="http://api.peakplusfinancial.ca">
-        <fileTransfer host="api.peakplusfinancial.ca" port="21">
+      <webServer id="ab2c546f-30bc-4f46-9a7e-0595e2c7fb34" name="api.peakplusfinancial" url="http://ftp.peakplusfinancial.ca">
+        <fileTransfer host="ftp.peakplusfinancial.ca" port="21">
           <advancedOptions>
             <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
           </advancedOptions>
