@@ -213,12 +213,15 @@ class ScriptController extends ApiBaseController
             }
 
             //fetch from api
-
-
+            $familyPlan      = null; // or true
+            if ($data['insurance-type']=='2'){
+                $familyPlan = 'true';
+            }else{
+                $familyPlan = 'false';
+            }
             $applicationDate = $data['start_date'];
             $tripDays        = $data['number_of_days'];
             $age             = $data['age'];
-            $familyPlan      = false; // or true
             $scheduleNo = ($data['medicalType'] == 1) ? 1 : 2;
 
         // Build query params dynamically
@@ -226,7 +229,7 @@ class ScriptController extends ApiBaseController
                 'applicationDate' => $applicationDate,
                 'tripDays'        => $tripDays,
                 'age'             => $age,
-                'familyPlan'      => $familyPlan ? 'true' : 'false'
+                'familyPlan'      => $familyPlan
             ]);
 
             $url = "https://devweb.desttravel.com/api/visitorquote/premiumoptions?" . $params;
