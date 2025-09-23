@@ -219,6 +219,9 @@ class ScriptController extends ApiBaseController
             }else{
                 $familyPlan = 'false';
             }
+            if ($data['age']>=61){
+                $familyPlan = 'false';
+            }
             $applicationDate = $data['start_date'];
             $tripDays        = $data['number_of_days'];
             $age             = $data['age'];
