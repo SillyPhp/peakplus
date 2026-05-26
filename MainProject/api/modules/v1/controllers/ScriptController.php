@@ -84,13 +84,14 @@ class ScriptController extends ApiBaseController
                 "medical" => $data['medicalType'],
                 "ref_url" => "https://www.desttravel.com/?id=77c6cdad-aa06-4f3b-99f0-0bec5c2233b8#/insuranceproducts/visitortocanadainsurance/quote/planprofile",
                 "number_of_days" => $data['number_of_days'],
-                "total_price" => null,
+                "total_price" => 0,
                 "document_name" => "Destination-Canada-Policy-Details",
                 "document_url" => "https://www.desttravel.com/downloads/DTC%20Visitors%20to%20Canada%20Policy_EN%200125.pdf",
                 "min_age" => $data['age'],
                 "max_age" => $data['age'],
                 "policy_id" => "2",
                 "rate_per" => null,
+                "applicants"=>[],
                 "company_id" => "2",
                 "deductible" => $data['deductible'],
                 "coverage_amount" => $model_coverage,
@@ -212,70 +213,74 @@ class ScriptController extends ApiBaseController
                 }
             }
 
-            //fetch from api
-            $familyPlan      = null; // or true
-            if ($data['insurance-type']=='2'){
-                $familyPlan = 'true';
-            }else{
-                $familyPlan = 'false';
+            $ages = [$data['age']];
+            if (!empty($data['age2'])) {
+                $ages[] = $data['age2'];
             }
-            if ($data['age']>=61){
-                $familyPlan = 'false';
-            }
-            $applicationDate = $data['start_date'];
-            $tripDays        = $data['number_of_days'];
-            $age             = $data['age'];
-            $scheduleNo = ($data['medicalType'] == 1) ? 1 : 2;
 
-        // Build query params dynamically
-            $params = http_build_query([
-                'applicationDate' => $applicationDate,
-                'tripDays'        => $tripDays,
-                'age'             => $age,
-                'familyPlan'      => $familyPlan
-            ]);
+            foreach ($ages as $age) {
+                $familyPlan      = 'false'; // or true
+                $applicationDate = $data['start_date'];
+                $tripDays        = $data['number_of_days'];
+                $scheduleNo      = ($data['medicalType'] == 1) ? 1 : 2;
 
-            $url = "https://devweb.desttravel.com/api/visitorquote/premiumoptions?" . $params;
+                // Build query params dynamically
+                $params = http_build_query([
+                    'applicationDate' => $applicationDate,
+                    'tripDays'        => $tripDays,
+                    'age'             => $age,
+                    'familyPlan'      => $familyPlan
+                ]);
 
-            $curl = curl_init();
-            curl_setopt_array($curl, [
-                CURLOPT_URL => $url,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_ENCODING => '',
-                CURLOPT_MAXREDIRS => 10,
-                CURLOPT_TIMEOUT => 0,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST => 'GET',
-                CURLOPT_HTTPHEADER => [
-                    'Authorization: Basic cGVha3BsdXMuYXBpOlBlYWtwbHVzQCMxMjM='
-                ],
-            ]);
+                $url = "https://www.desttravel.com/api/visitorquote/premiumoptions?" . $params;
 
-            $response = curl_exec($curl);
-            curl_close($curl);
+                $curl = curl_init();
+                curl_setopt_array($curl, [
+                    CURLOPT_URL => $url,
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_ENCODING => '',
+                    CURLOPT_MAXREDIRS => 10,
+                    CURLOPT_TIMEOUT => 0,
+                    CURLOPT_FOLLOWLOCATION => true,
+                    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                    CURLOPT_CUSTOMREQUEST => 'GET',
+                    CURLOPT_HTTPHEADER => [
+                        'Authorization: Basic cGVha3BsdXMuYXBpOlBlYWtwbHVzQDEyMw=='
+                    ],
+                ]);
 
-             $response = json_decode($response, true);
+                $response = curl_exec($curl);
+                curl_close($curl);
 
-            // Search for matching plan
-            $result_plan = array_filter($response, function($plan) use ($model_coverage, $scheduleNo) {
-                return $plan['SumInsured'] == $model_coverage && $plan['ScheduleNo'] == $scheduleNo;
-            });
+                $response = json_decode($response, true);
+                if ($response){
+                    // Search for matching plan
+                    $result_plan = array_filter($response, function($plan) use ($model_coverage, $scheduleNo) {
+                        return $plan['SumInsured'] == $model_coverage && $plan['ScheduleNo'] == $scheduleNo;
+                    });
 
-// Reset keys
-            $result_plan = array_values($result_plan);
+                    // Reset keys
+                    $result_plan = array_values($result_plan);
 
-// Show result
-            if (!empty($result_plan)) {
-                $deductibleKey = "Deductible" . $data['deductible'];
-                if (isset($result_plan[0][$deductibleKey])) {
-                    $deductibleValue = $result_plan[0][$deductibleKey];
-                    $plan_2['rate_per'] = $result_plan[0]['DailyRate'];
-                    $plan_2['total_price'] = $deductibleValue;
-                    //fetch api data
-                    $results[] = $plan_2; //plan for company id 2;
+                    // Show result
+                    if (!empty($result_plan)) {
+                        $deductibleKey = "Deductible" . $data['deductible'];
+                        if (isset($result_plan[0][$deductibleKey])) {
+                            $deductibleValue = $result_plan[0][$deductibleKey];
+                            $plan_2['rate_per'] += $result_plan[0]['DailyRate'];
+                            $plan_2['total_price'] += $deductibleValue;
+                            //$plan_2['age'] = $age; // helpful for tracking which age’s result
+                            $plan_2['applicants'][] = [
+                                'age'         => $age,
+                                'total_price' => $deductibleValue,
+                                'rate_per'    => $result_plan[0]['DailyRate']
+                            ];
+                        }
+                    }
                 }
             }
+            $results[] = $plan_2;
+
             if ($results){
                 return $this->response(200, ['status' => 200, 'data' => $results]);
             }else{
